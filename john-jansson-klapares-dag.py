@@ -163,6 +163,7 @@ def compare(team_one, team_two, year):
     actual_round += 1
 
 
+compare('AIK', 'Djurgården', raw_input('Vilket år vill kolla? \n'))
 
 
 print('\n--------------\nProvided by Everysport.com')
