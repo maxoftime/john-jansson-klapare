@@ -27,25 +27,35 @@ id_2014 = '63925,'
 id_2015 = '69620,'
 id_2016 = '73163'
 
-year_list = id_1997 + id_1998 + id_1999 + id_2000 + id_2001 + id_2002 + id_2003 + id_2004 + id_2005 + id_2006 + id_2007 + id_2008 + id_2009 + id_2010 + id_2011 + id_2012 + id_2013 + id_2014 + id_2015 + id_2016
+year_id_list = id_1997 + id_1998 + id_1999 + id_2000 + id_2001 + id_2002 + id_2003 + id_2004 + id_2005 + id_2006 + id_2007 + id_2008 + id_2009 + id_2010 + id_2011 + id_2012 + id_2013 + id_2014 + id_2015 + id_2016
 round_list = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30'
 team_id_list = '9367, 9368'
 
-all_the_data_url = 'http://api.everysport.com/v1/events?apikey='+ str(apiKey) + '&league=' + year_list + '&team=' + team_id_list + '&round=' + round_list + '&limit=1000'
-#print(all_the_data_url)
+all_the_data_url = 'http://api.everysport.com/v1/events?apikey='+ str(apiKey) + '&league=' + year_id_list + '&team=' + team_id_list + '&round=' + round_list + '&limit=1000'
 all_the_data = requests.get(all_the_data_url)
 all_the_data = all_the_data.json()
-
 all_events = all_the_data['events']
+
+#print(all_the_data_url)
 
 def year_lister(events):
   year = 0
+  i = 0
+  years_list = []
   for event in events:
     if event['startDate'][0:4] != year:
       year = event['startDate'][0:4]
-      
+      years_list[i] = year
+      i += 1
+  return years_list
 
-def get_events_one_year(events, year):
+
+def get_all_events_one_year(events, year):
+  '''
+  Input in events should preferably be the the response (in this case all_events).
+  And also a year between 1999 and 2016 as a string.
+
+  '''
   all_events_one_year = []
   for event in events:
     if (event['startDate'][0:4] == year):
@@ -53,37 +63,62 @@ def get_events_one_year(events, year):
   return all_events_one_year
 
 
-def add_points(events, team):
+def get_team_events_one_year(events, team):
+  '''
+  Input in events should preferably be the return from get_all_events_one_year().
+
+  '''
+  team_events_one_year = []
+  for event in events:
+    if (event['homeTeam']['shortName'].encode('utf-8') == team or event['visitingTeam']['shortName'].encode('utf-8') == team):
+      team_events_one_year.append(event)
+  return team_events_one_year
+
+
+def get_total_rounds(events):
+  '''
+  Input in events should preferably be the return from get_team_events_one_year().
+
+  '''
+  total_rounds = len(events)
+  return total_rounds
+
+
+def add_points(events, team): 
+  '''
+  Input in events should preferably be the return from get_team_events_one_year().
+
+  '''
   team_points = 0
   points_per_round = []
   i = 1
   for event in events:
-    if (event['homeTeam']['shortName'].encode('utf-8') == team) and (event['homeTeamScore'] > event['visitingTeamScore']):
+    if (event['homeTeam']['shortName'].encode('utf-8') == team and (event['homeTeamScore'] > event['visitingTeamScore'])):
       team_points += 3
-      points_per_round.append(('omg ' + str(i), team_points))
+      points_per_round.append((i, team_points))
       i += 1
     
-    elif (event['homeTeam']['shortName'].encode('utf-8') == team) and (event['homeTeamScore'] == event['visitingTeamScore']):
+    elif ((event['homeTeam']['shortName'].encode('utf-8') == team) and (event['homeTeamScore'] == event['visitingTeamScore'])):
       team_points += 1
-      points_per_round.append(('omg ' + str(i), team_points))
+      points_per_round.append((i, team_points))
       i += 1
 
-    elif (event['homeTeam']['shortName'].encode('utf-8') == team) and (event['homeTeamScore'] < event['visitingTeamScore']):
-      points_per_round.append(('omg ' + str(i), team_points))
+    elif ((event['homeTeam']['shortName'].encode('utf-8') == team) and (event['homeTeamScore'] < event['visitingTeamScore'])):
+      points_per_round.append((i, team_points))
       i += 1
 
-    elif (event['visitingTeam']['shortName'].encode('utf-8') == team) and (event['visitingTeamScore'] > event['homeTeamScore']):
+    elif ((event['visitingTeam']['shortName'].encode('utf-8') == team) and (event['visitingTeamScore'] > event['homeTeamScore'])):
       team_points += 3
-      points_per_round.append(('omg ' + str(i), team_points))
+      points_per_round.append((i, team_points))
       i += 1
 
-    elif (event['visitingTeam']['shortName'].encode('utf-8') == team) and (event['visitingTeamScore'] == event['homeTeamScore']):
+    elif ((event['visitingTeam']['shortName'].encode('utf-8') == team) and (event['visitingTeamScore'] == event['homeTeamScore'])):
       team_points += 1
-      points_per_round.append(('omg ' + str(i), team_points))
+      points_per_round.append((i, team_points))
       i += 1
 
-    elif (event['visitingTeam']['shortName'].encode('utf-8') == team) and (event['visitingTeamScore'] < event['homeTeamScore']):
-      points_per_round.append(('omg ' + str(i), team_points))
+    elif ((event['visitingTeam']['shortName'].encode('utf-8') == team) and (event['visitingTeamScore'] < event['homeTeamScore'])):
+      points_per_round.append((i, team_points))
       i += 1
 
     else:
@@ -91,79 +126,42 @@ def add_points(events, team):
     
   return points_per_round
 
-AIK_points_2015 = add_points(get_events_one_year(all_events, '2015'), 'AIK')
-DIF_points_2015 = add_points(get_events_one_year(all_events, '2015'), 'Djurgården')
-
-single_rounds = 0
-while single_rounds <= 29:
-  print(AIK_points_2015[single_rounds][1])
-  single_rounds += 1
 
 
-#pp.pprint(DIF_points_2015)
+def compare(team_one, team_two, year):
+  the_year = get_all_events_one_year(all_events, year)
+  AIK = get_team_events_one_year(the_year, team_one)
+  DIF = get_team_events_one_year(the_year, team_two)
+  AIK_points = add_points(AIK, team_one)
+  DIF_points = add_points(DIF, team_two)
 
-#add_points(all_events_2008, 'Djurgården')
-#print('Vid slutet av säsongen har ' + team  + str(team_points) + ' poäng.')
+  all_rounds = len(AIK_points)
+  rounds_left = len(AIK_points)
+  actual_round = 0
 
-#allsvenskan_year = allsvenskan['startDate'] [0:4]
+  while actual_round < all_rounds:
+    possible_points_left = rounds_left * 3
+    point_difference = AIK_points[actual_round][1] - DIF_points[actual_round][1]
+    rounds_left -= 1
 
-#total_rounds = 30
-#possible_points_left = 3 * total_rounds
+    #print('Omgång ' + str(actual_round + 1))
+    #print(str(possible_points_left) + ' poäng kvar.')
+    #print('AIKs poäng efter denna runda: ' + str(AIK_points[actual_round][1]))
+    #print('DIFs poäng efter denna runda: ' + str(DIF_points[actual_round][1]))
 
-##pp.pprint(total_rounds_this_year)
- #pp.pprint(total_rounds_this_year['events'][0]['round'])
- ##the_current_round = total_rounds_this_year.content
- #the_actual_nr_of_rounds = total_rounds_this_year['events'][0]['round']
- #the_actual_nr_of_rounds_left = the_actual_nr_of_rounds
- #game_round = 1
- #while game_round <= the_actual_nr_of_rounds:
- #  time.sleep(0.5)
- #  allsvenskan_table = es.get_standings(current_year_id, game_round, 'total')
- #  #print('\nOmgång ' + str(game_round))
- #  for teams in allsvenskan_table[0]['standings']:
- #    team_name = teams['team']['shortName'].encode('utf-8')
- #    if team_name == 'AIK':
- #      p_AIK = int(teams['stats'][7]['value'])
- #      #print(team_name + ' har ' + str(p_AIK) + ' poäng.')
- #
- #    elif team_name == 'Djurgårdens IF':
- #      p_DIF = int(teams['stats'][7]['value'])
- #      #print(team_name + ' har ' + str(p_DIF) + ' poäng.')
- #    
- #  game_round += 1
- #  print(game_round)
- #  the_actual_nr_of_rounds_left -= 1
- #  possible_points_left = 3 * the_actual_nr_of_rounds_left
- #  point_difference = p_AIK - p_DIF
- #  if point_difference > possible_points_left:
- #    print('här?')
- #    #print('John Jansson klåpares dag infaller den här omgången')
- #    time.sleep(0.5)
- #    allsvenskan_rounds_date = es.events.leagues(current_year_id)
- #    for all_rounds in allsvenskan_rounds_date:
- #      #pp.pprint(all_rounds)
- #      if all_rounds['round'] == game_round:
- #        if all_rounds['visitingTeam']['shortName'].encode('utf-8') == 'Djurgårdens IF' or all_rounds['homeTeam']['shortName'].encode('utf-8') == 'Djurgårdens IF':
- #          #print('Skriver till fil...')
- #          file = open('collection.txt', 'a')
- #          #file.write('\n--------------\n' + allsvenskan['shortName'] + ' ' + allsvenskan_year)
- #          file.write('\nOmgång ' + str(game_round) + '\n')
- #          file.write(all_rounds['startDate']  + '\n--------------\n')
- #          file.close()
- #          #print('Klart!')
- #          break
- #        else:
- #          #print('no no no...')
- #          continue
- #          
- #        #pp.pprint(all_rounds)
- #        #print(all_rounds['startDate'])
- #        #print(all_rounds['visitingTeam']['shortName'].encode('utf-8'))
- #        #print('\n')
- #    break
- #  else:
- #    continue
- #
+    if point_difference > possible_points_left:
+      the_date = DIF[actual_round]['startDate']
+      
+      print('John Jansson Klåpares dag inträffade i runda ' + str(actual_round) + ' och på detta datum ' + str(the_date))
+      return the_date
+
+    elif rounds_left == 0 and point_difference <= possible_points_left:
+      has_not_happened = 'John Jansson Klåpares dag inträffade aldrig ' + str(DIF[actual_round]['startDate'][:4])
+      print(has_not_happened)
+      return (has_not_happened)
+
+    actual_round += 1
+
 
 
 
