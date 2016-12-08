@@ -31,7 +31,7 @@ year_id_list = id_1997 + id_1998 + id_1999 + id_2000 + id_2001 + id_2002 + id_20
 round_list = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30'
 team_id_list = '9367, 9368'
 
-all_the_data_url = 'http://api.everysport.com/v1/events?apikey='+ str(apiKey) + '&league=' + year_id_list + '&team=' + team_id_list + '&round=' + round_list + '&limit=1000'
+all_the_data_url = 'http://api.everysport.com/v1/events?apikey=' + str(apiKey) + '&league=' + year_id_list + '&team=' + team_id_list + '&round=' + round_list + '&limit=1000'
 all_the_data = requests.get(all_the_data_url)
 all_the_data = all_the_data.json()
 all_events = all_the_data['events']
@@ -40,12 +40,13 @@ all_events = all_the_data['events']
 
 def year_lister(events):
   year = 0
-  i = 0
+  
   years_list = []
+  i = 0
   for event in events:
     if event['startDate'][0:4] != year:
       year = event['startDate'][0:4]
-      years_list[i] = year
+      years_list.append(year)
       i += 1
   return years_list
 
@@ -130,13 +131,24 @@ def add_points(events, team):
 
 def compare(team_one, team_two, year):
   the_year = get_all_events_one_year(all_events, year)
+  
   AIK = get_team_events_one_year(the_year, team_one)
+  if AIK == []:
+    print('Endast Djurgården spelade i Allsvenskan ' + str(the_year[0]['startDate'][0:4]) + '.')
+    return
+  else:
+    AIK_points = add_points(AIK, team_one)
+    all_rounds = len(AIK_points)
+    rounds_left = len(AIK_points)
+  
   DIF = get_team_events_one_year(the_year, team_two)
-  AIK_points = add_points(AIK, team_one)
-  DIF_points = add_points(DIF, team_two)
+  if DIF == []:
+    print('Endast AIK spelade i Allsvenskan ' + str(the_year[0]['startDate'][0:4]) + '.')
+    return
+  else:
+     DIF_points = add_points(DIF, team_two)
 
-  all_rounds = len(AIK_points)
-  rounds_left = len(AIK_points)
+  
   actual_round = 0
 
   while actual_round < all_rounds:
@@ -152,7 +164,9 @@ def compare(team_one, team_two, year):
     if point_difference > possible_points_left:
       the_date = DIF[actual_round]['startDate']
       
-      print('John Jansson Klåpares dag inträffade i runda ' + str(actual_round) + ' och på detta datum ' + str(the_date))
+
+      # %-d %B %Y datum månad år. .strftime
+      print('John Jansson Klåpares dag inträffade i runda ' +  str(actual_round) + ' på datumet ' + str(the_date[:10]))
       return the_date
 
     elif rounds_left == 0 and point_difference <= possible_points_left:
@@ -162,8 +176,10 @@ def compare(team_one, team_two, year):
 
     actual_round += 1
 
+all_years_list = year_lister(all_events)
 
-compare('AIK', 'Djurgården', raw_input('Vilket år vill kolla? \n'))
+for year in all_years_list:
+  compare('AIK', 'Djurgården', year)
 
 
 print('\n--------------\nProvided by Everysport.com')
