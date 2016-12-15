@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+    	<meta charset="UTF-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<title>John Jansson Klåpares dag</title>
+	    <link rel="stylesheet" href="{{ static_url("css/style.css") }}">
+    	<link rel="icon" type="image/gif" href="{{ static_url('img/favicon.gif') }}" />
+        <link href="https://fonts.googleapis.com/css?family=Cedarville+Cursive" rel="stylesheet"> 
+    </head>
+
+    <body>
+        <p class="intro">
+            <strong>John Jansson klåpares dag</strong> är en högtidsdag som  infaller när Djurgårdens Idrottsförening inte längre kan komma ikapp Allmänna Idrottsklubben i Allsvenskan. 
+        </p>
+
+        <main class="main">
+            <p>
+            <!-- {% for item in result %} -->
+            <!-- {{ item }} -->
+            <!-- {% end %} -->
+            
+            {{ result[0] }}
+            </p>
+        </main>
+    </body>
+</html>

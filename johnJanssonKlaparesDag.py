@@ -1,9 +1,9 @@
 ﻿import apikey
 import os
-import pprint
 import requests
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
-pp = pprint.PrettyPrinter(indent=2)
 apiKey = os.environ['ES_APIKEY']
 
 id_1997 = '44255,'
@@ -31,12 +31,12 @@ year_id_list = id_1997 + id_1998 + id_1999 + id_2000 + id_2001 + id_2002 + id_20
 round_list = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30'
 team_id_list = '9367, 9368'
 
+result = []
+
 all_the_data_url = 'http://api.everysport.com/v1/events?apikey=' + str(apiKey) + '&league=' + year_id_list + '&team=' + team_id_list + '&round=' + round_list + '&limit=1000'
 all_the_data = requests.get(all_the_data_url)
 all_the_data = all_the_data.json()
 all_events = all_the_data['events']
-
-#print(all_the_data_url)
 
 def year_lister(events):
   year = 0
@@ -130,12 +130,20 @@ def add_points(events, team):
 
 
 def compare(team_one, team_two, year):
+  
   the_year = get_all_events_one_year(all_events, year)
   
   AIK = get_team_events_one_year(the_year, team_one)
   if AIK == []:
-    print('Endast Djurgården spelade i Allsvenskan ' + str(the_year[0]['startDate'][0:4]) + '.')
-    return
+    result.append({
+                'year': the_year[0]['startDate'][0:4],
+                'date': '',
+                'event': 'Endast Djurgården spelade i Allsvenskan',
+                'round': ''
+              })
+    #print('Endast Djurgården spelade i Allsvenskan ' + str(the_year[0]['startDate'][0:4]) + '.')
+    #print(result)
+    return result
   else:
     AIK_points = add_points(AIK, team_one)
     all_rounds = len(AIK_points)
@@ -143,8 +151,15 @@ def compare(team_one, team_two, year):
   
   DIF = get_team_events_one_year(the_year, team_two)
   if DIF == []:
-    print('Endast AIK spelade i Allsvenskan ' + str(the_year[0]['startDate'][0:4]) + '.')
-    return
+    result.append({
+                'year': the_year[0]['startDate'][0:4],
+                'date': '',
+                'event': 'Endast AIK spelade i Allsvenskan',
+                'round': ''
+              })
+    #print('Endast AIK spelade i Allsvenskan ' + str(the_year[0]['startDate'][0:4]) + '.')
+    #print(result)
+    return result
   else:
      DIF_points = add_points(DIF, team_two)
 
@@ -156,30 +171,37 @@ def compare(team_one, team_two, year):
     point_difference = AIK_points[actual_round][1] - DIF_points[actual_round][1]
     rounds_left -= 1
 
-    #print('Omgång ' + str(actual_round + 1))
-    #print(str(possible_points_left) + ' poäng kvar.')
-    #print('AIKs poäng efter denna runda: ' + str(AIK_points[actual_round][1]))
-    #print('DIFs poäng efter denna runda: ' + str(DIF_points[actual_round][1]))
-
     if point_difference > possible_points_left:
       the_date = DIF[actual_round]['startDate']
-      
-
-      # %-d %B %Y datum månad år. .strftime
-      print('John Jansson Klåpares dag inträffade i runda ' +  str(actual_round) + ' på datumet ' + str(the_date[:10]))
-      return the_date
-
+      result.append({
+                'year': the_year[0]['startDate'][0:4],
+                'date': the_date[:10],
+                'event': 'John Jansson Klåpares dag inträffade',
+                'round': actual_round
+              })
+      #print('John Jansson Klåpares dag inträffade i runda ' +  str(actual_round) + ' på datumet ' + str(the_date[:10]))
+      return result
     elif rounds_left == 0 and point_difference <= possible_points_left:
-      has_not_happened = 'John Jansson Klåpares dag inträffade aldrig ' + str(DIF[actual_round]['startDate'][:4])
-      print(has_not_happened)
-      return (has_not_happened)
+      result.append({
+                'year': the_year[0]['startDate'][0:4],
+                'date': '',
+                'event': 'John Jansson Klåpares dag inträffade aldrig',
+                'round': actual_round
+              })
+      #print('hnde aldrigDet ')
+      #print(result)
+      return result
 
     actual_round += 1
+    
+  #print(result)
+  return result
 
 all_years_list = year_lister(all_events)
-
 for year in all_years_list:
   compare('AIK', 'Djurgården', year)
-
-
-print('\n--------------\nProvided by Everysport.com')
+result.append({
+          'credit': 'Provided by Everysport.com',
+          'url': 'http://everysport.com'
+          })
+#pp.pprint(result)

@@ -1,0 +1,69 @@
+html {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+	background: url('https://www.transparenttextures.com/patterns/blizzard.png') #f5f5f5;
+	background-attachment: fixed;
+	color: #222;
+	font-family: sans-serif;
+	font-size: 18px;
+	line-height: 1.6rem;
+	margin: 0;
+	padding: 0;
+
+}
+
+.intro {
+    font-family: 'Cedarville Cursive', georgia, script;
+
+	font-size: 3.03em;
+	line-height: 1.2;
+    text-shadow: 3px 3px 0px rgba(255,255,255,1);
+    width: 70vw;
+    max-width: 980px;
+    top: 2.0001em;
+    position: inline-block;
+    position: -safari-sticky;
+    position: sticky;
+    margin: 2em auto 3em;
+    z-index: -5;
+}
+
+.intro > strong {
+    font-weight: 600;
+}
+
+.intro::selection {
+	color: #fff;
+	background: #666;
+}
+
+.intro::-moz-selection {
+	color: #fff;
+	background: #666;
+}
+
+.intro > strong::selection {
+	color: #fff;
+	background: #666;
+}
+
+.intro  > strong::-moz-selection {
+	color: #fff;
+	background: #666;
+}
+
+.main {
+	height: 1200px;
+	width: 100%;
+	background: #eee;
+	position: relative;
+	z-index: 1;
+
+}
