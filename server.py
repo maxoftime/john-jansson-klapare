@@ -24,7 +24,18 @@ def make_app():
 
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+    
+#     app.listen(8888)
+#     tornado.ioloop.IOLoop.current().start()
+
+
+def main():
     app = make_app()
-    app.listen(8888)
-    tornado.ioloop.IOLoop.current().start()
+    http_server = tornado.httpserver.HTTPServer(app)
+    port = int(os.environ.get("PORT", 5000))
+    http_server.listen(port)
+    tornado.ioloop.IOLoop.instance().start()
+ 
+if __name__ == "__main__":
+    main()
