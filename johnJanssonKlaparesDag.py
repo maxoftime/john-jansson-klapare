@@ -1,8 +1,6 @@
 ﻿import apikey
 import os
 import requests
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
 
 apiKey = os.environ['ES_APIKEY']
 
@@ -204,4 +202,3 @@ result.append({
           'credit': 'Provided by Everysport.com',
           'url': 'http://everysport.com'
           })
-#pp.pprint(result)
